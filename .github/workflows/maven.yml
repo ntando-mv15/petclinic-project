@@ -11,9 +11,6 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    strategy:
-        fail-fast: true
-
     steps:
     - uses: actions/checkout@v4
     
@@ -35,6 +32,7 @@ jobs:
       with:
         name: petclinic-war
         path: "/petclinic.war"
+        if-no-files-found: error
     
     
 
