@@ -1,4 +1,4 @@
-name: Java CI pipeline
+name: Java CI-CD pipeline
 
 on:
   push:
@@ -35,4 +35,28 @@ jobs:
         if-no-files-found: error
     
     
+  deploy:
+     needs: build
+     runs-on: ubuntu-latest
+
+     steps:
+
+     - name: Download artifact
+       uses: actions/download-artifact@v3
+       with:
+        name: petclinic-war
+        path: "/home/runner/work/Petclinic/Petclinic/target/"
+
+
+     - name: Set up SSH
+       run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+     
+        
+     - name: Deploy to EC2
+       run: |
+            scp -i "~/.ssh/id_rsa" -o StrictHostKeyChecking=no /home/runner/work/Petclinic/Petclinic/target/petclinic.war ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/opt/apache-tomcat-9.0.65/webapps
+            
 
