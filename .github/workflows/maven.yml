@@ -13,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with: 
+        fetch-depth: 0
     
     - name: Set up JDK 11
       uses: actions/setup-java@v3
@@ -20,21 +22,22 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+       
+    - name: Cache SonarQube packages
+      uses: actions/cache@v1
+      with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
         
 
-    - name: Build with Maven
-      run: mvn clean package
-   
-    - name: SonarQube Scanner
-      uses:  sonarsource/sonarqube-scan-action@v2.1.0
-      with:
-        projectBaseDir: .  
-        args: >
-          -Dsonar.projectKey=petclinic-project
-          -Dsonar.host.url=http://18.234.145.38:9000/
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-          -Dsonar.java.binaries=target/classes 
-          -Dsonar.exclusions=**/target/**    
+    - name: Build and Analyze
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=petclinic-project
+
+     
 
     - name: Upload Artifact
       if: success()
