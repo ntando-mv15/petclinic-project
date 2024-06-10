@@ -25,6 +25,14 @@ jobs:
     - name: Build with Maven
       run: mvn clean package
    
+    - name: SonarQube Scanner
+      uses:  sonarsource/sonarqube-scan-action@v2.1.0
+      with:
+        projectBaseDir: .  
+        args: >
+          -Dsonar.projectKey=petclinic-project
+          -Dsonar.host.url=http://18.234.145.38:9000/
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
     - name: Upload Artifact
       if: success()
